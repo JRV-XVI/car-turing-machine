@@ -125,8 +125,10 @@ public:
   bool analyze(float distance) {
     Node* nextNode = currentNode->getNextNode(distance);
     if (nextNode != nullptr) {
-      // Store the previous state before updating currentNode
+      // Store current node before transition
       Node* prevNode = currentNode;
+      
+      // Make the transition
       currentNode = nextNode;
       char currentSymbol = getCurrentNodeChar();
       
@@ -134,16 +136,19 @@ public:
         output[outputCount++] = currentSymbol;
       }
       
-      // Only reject if we're in state C and transitioning to another state that would form "abc"
-      // We need to check if coming from state B to state C, then receiving an 'a'
-      if (prevNode == b && currentNode == c) {
-        // We have "ab" and now a 'c'
-        // Check if the last two characters were 'a' and 'b'
-        if (outputCount >= 3 && 
-            output[outputCount-3] == 'a' && 
-            output[outputCount-2] == 'b' && 
-            output[outputCount-1] == 'c') {
-          currentNode = reject;
+      // Only reject if:
+      // 1. We were in state C
+      // 2. We're still in state C (self-loop)
+      // 3. The output contains "abc"
+      if (prevNode == c && currentNode == c) {
+        // Check for "abc" pattern in the entire output
+        for (int i = 0; i < outputCount - 2; i++) {
+          if (output[i] == 'a' && 
+              output[i+1] == 'b' && 
+              output[i+2] == 'c') {
+            currentNode = reject;
+            break;
+          }
         }
       }
       
@@ -332,5 +337,5 @@ void loop() {
   }
   
   // Add a delay between readings
-  delay(3000);
+  delay(2000);
 }
