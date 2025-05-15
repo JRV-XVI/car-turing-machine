@@ -178,15 +178,15 @@ public:
 };
 
 // Arduino pins configuration
-#define TRIG_PIN 7
-#define ECHO_PIN 6
+#define TRIG_PIN 6
+#define ECHO_PIN 5
 
-#define LED_A 4
-#define LED_B 3
-#define LED_C 2
-#define LED_VALID 9
-#define LED_INVALID 8
-#define LED_EMPTY 10
+#define LED_A A3
+#define LED_B A4
+#define LED_C A5
+#define LED_VALID A1
+#define LED_INVALID A2
+#define LED_EMPTY A0
 
 // Global flag to track if program has completed
 bool programTerminated = false;
