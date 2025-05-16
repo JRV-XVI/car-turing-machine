@@ -2,71 +2,136 @@
 #define TM_HPP
 
 #include "node.hpp"
-#include <algorithm>
-#include <iostream>
-#include <vector>
-
+#include <Arduino.h>
+// Turing Machine class
 class TM {
 private:
-  // Declaring all node
-  Node *start = new Node(false);
-  Node *a = new Node(false);
-  Node *b = new Node(false);
-  Node *c = new Node(false);
-  Node *halt = new Node(true);
-  Node *currentNode = start;
+  // Declaring all nodes
+  Node *start;
+  Node *a;
+  Node *b;
+  Node *c;
+  Node *halt;
+  Node *reject; // New reject state for "abc" detection
+  Node *currentNode;
 
-  // Declaring ranges from each transition
-  std::pair<float, float> aRange = {0.0, 10.0};
-  std::pair<float, float> bRange = {10.0, 20.0};
-  std::pair<float, float> cRange = {20.0, 30.0};
-  std::pair<float, float> spaceRange = {30.0, 100.0};
-
-  // Path taken for each lecture
-  std::vector<char> output;
+  // Output array
+  char output[MAX_OUTPUT_SIZE];
+  int outputCount;
 
 public:
   TM() {
+    // Create nodes
+    start = new Node(false);
+    a = new Node(false);
+    b = new Node(false);
+    c = new Node(false);
+    halt = new Node(true, false);  // Final accepted state
+    reject = new Node(true, true); // Final rejected state
+    currentNode = start;
+    outputCount = 0;
+
     // Node start transition
-    start->addTransition(spaceRange, a);
+    start->addTransition(30.0, 100.0, a);
+
     // Node a transitions
-    a->addTransition(aRange, b);
-    a->addTransition(bRange, a);
-    a->addTransition(cRange, a);
-    a->addTransition(spaceRange, halt);
+    a->addTransition(0.0, 20.0, b);  // 'a' symbol
+    a->addTransition(20, 40.0, a); // 'b' symbol
+    a->addTransition(40.0, 60.0, a); // 'c' symbol
+    a->addTransition(60.0, 200.0, halt);
+
     // Node b transitions
-    b->addTransition(aRange, b);
-    b->addTransition(bRange, c);
-    b->addTransition(cRange, a);
-    b->addTransition(spaceRange, halt);
+    b->addTransition(0.0, 20.0, b);
+    b->addTransition(20, 40.0, c); // 'b' symbol
+    b->addTransition(40.0, 60.0, a); // 'c' symbol
+    b->addTransition(60.0, 200.0, halt);
+
     // Node c transitions
-    c->addTransition(aRange, b);
-    c->addTransition(bRange, a);
-    c->addTransition(cRange, c);
-    c->addTransition(spaceRange, halt);
+    c->addTransition(0.0, 20.0, b);  // 'a' symbol
+    c->addTransition(20, 40.0, a); // 'b' symbol
+    c->addTransition(40.0, 60.0, c); // 'c' symbol
+    c->addTransition(60.0, 200.0, halt);
   }
 
-  std::vector<char> analyze(float distance) {
+  // Returns the current node as a character
+  char getCurrentNodeChar() {
+    if (currentNode == a)
+      return 'a';
+    else if (currentNode == b)
+      return 'b';
+    else if (currentNode == c)
+      return 'c';
+    else if (currentNode == halt || currentNode == reject)
+      return '_';
+    else
+      return '?';
+  }
+
+  // Returns the current state as a string
+  String getCurrentState() {
+    if (currentNode == start)
+      return "start";
+    else if (currentNode == a)
+      return "a";
+    else if (currentNode == b)
+      return "b";
+    else if (currentNode == c)
+      return "c";
+    else if (currentNode == halt)
+      return "halt";
+    else if (currentNode == reject)
+      return "reject";
+    else
+      return "unknown";
+  }
+
+  bool analyze(float distance) {
     Node *nextNode = currentNode->getNextNode(distance);
     if (nextNode != nullptr) {
+      // Store current node before transition
+      Node *prevNode = currentNode;
+
+      // Make the transition
       currentNode = nextNode;
-      if (currentNode == a) {
-        output.push_back('a');
-      } else if (currentNode == b) {
-        output.push_back('b');
-      } else if (currentNode == c) {
-        output.push_back('c');
-      } else if (currentNode == halt) {
-        output.push_back('_');
+      char currentSymbol = getCurrentNodeChar();
+
+      if (outputCount < MAX_OUTPUT_SIZE) {
+        output[outputCount++] = currentSymbol;
       }
+
+      // Only reject if:
+      // 1. We were in state C
+      // 2. We're still in state C (self-loop)
+      // 3. The output contains "abc"
+      if (prevNode == c && currentNode == c) {
+        // Check for "abc" pattern in the entire output
+        for (int i = 0; i < outputCount - 2; i++) {
+          if (output[i] == 'a' && output[i + 1] == 'b' &&
+              output[i + 2] == 'c') {
+            currentNode = reject;
+            break;
+          }
+        }
+      }
+
+      return true;
     }
-    return output;
+    return false;
   }
 
-  void getOutput() {
-    for (char state : output) {
-      std::cout << state << std::endl;
+  // Check if the machine has halted
+  bool isHalted() { return currentNode->isFinal; }
+
+  // Check if the machine has rejected the input
+  bool isRejected() { return currentNode->isReject; }
+
+  // Get the complete output string so far
+  String getOutputString() {
+    String result = "";
+    for (int i = 0; i < outputCount; i++) {
+      result += output[i];
     }
+    return result;
   }
 };
 

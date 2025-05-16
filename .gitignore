@@ -49,3 +49,6 @@
 
 # Arduino
 *.yaml
+
+# Unix
+*.sh
