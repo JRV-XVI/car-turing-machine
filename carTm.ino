@@ -12,12 +12,12 @@
 #define ECHO_PIN 5
 
 // Led pins
-#define LED_A A3
-#define LED_B A4
-#define LED_C A5
-#define LED_VALID A1
-#define LED_INVALID A2
-#define LED_EMPTY A0
+#define LED_GREEN A3
+#define LED_YELLOW A4
+#define LED_RED A5
+#define LED_BLUE A1
+#define LED_ORANGE A2
+#define LED_WHITE A0
 
 // Engine pins
 #define IN_1 10
@@ -50,12 +50,12 @@ void setup() {
   pinMode(ECHO_PIN, INPUT);
 
   // Leds
-  pinMode(LED_A, OUTPUT);
-  pinMode(LED_B, OUTPUT);
-  pinMode(LED_C, OUTPUT);
-  pinMode(LED_VALID, OUTPUT);
-  pinMode(LED_INVALID, OUTPUT);
-  pinMode(LED_EMPTY, OUTPUT);
+  pinMode(LED_GREEN, OUTPUT);
+  pinMode(LED_YELLOW, OUTPUT);
+  pinMode(LED_RED, OUTPUT);
+  pinMode(LED_BLUE, OUTPUT);
+  pinMode(LED_ORANGE, OUTPUT);
+  pinMode(LED_WHITE, OUTPUT);
 
   // Engines
   pinMode(IN_1, OUTPUT);
@@ -66,17 +66,17 @@ void setup() {
   pinMode(EN_B, OUTPUT);
 
   // Turn off all LEDs at start
-  digitalWrite(LED_A, LOW);
-  digitalWrite(LED_B, LOW);
-  digitalWrite(LED_C, LOW);
-  digitalWrite(LED_VALID, LOW);
-  digitalWrite(LED_INVALID, LOW);
-  digitalWrite(LED_EMPTY, LOW);
+  digitalWrite(LED_GREEN, LOW);
+  digitalWrite(LED_YELLOW, LOW);
+  digitalWrite(LED_RED, LOW);
+  digitalWrite(LED_BLUE, LOW);
+  digitalWrite(LED_ORANGE, LOW);
+  digitalWrite(LED_WHITE, LOW);
 
   Serial.println("Turing Machine starting...");
 
   // Initial state is start - light up EMPTY LED
-  digitalWrite(LED_EMPTY, HIGH);
+  digitalWrite(LED_WHITE, HIGH);
 }
 
 // Get distance reading from ultrasonic sensor
@@ -95,32 +95,32 @@ float readDistance() {
 // Update LEDs based on the current STATE, not symbol
 void updateLEDs(String currentState) {
   // Turn off all LEDs first
-  digitalWrite(LED_A, LOW);
-  digitalWrite(LED_B, LOW);
-  digitalWrite(LED_C, LOW);
-  digitalWrite(LED_VALID, LOW);
-  digitalWrite(LED_INVALID, LOW);
-  digitalWrite(LED_EMPTY, LOW);
+  digitalWrite(LED_GREEN, LOW);
+  digitalWrite(LED_YELLOW, LOW);
+  digitalWrite(LED_RED, LOW);
+  digitalWrite(LED_BLUE, LOW);
+  digitalWrite(LED_ORANGE, LOW);
+  digitalWrite(LED_WHITE, LOW);
 
   // Turn on appropriate LED based on state
   if (currentState == "start") {
     // Start state - empty LED
-    digitalWrite(LED_EMPTY, HIGH);
-  } else if (currentState == "a") {
+    digitalWrite(LED_WHITE, HIGH);
+  } else if (currentState == "green") {
     // State a - LED A
-    digitalWrite(LED_A, HIGH);
-  } else if (currentState == "b") {
+    digitalWrite(LED_GREEN, HIGH);
+  } else if (currentState == "yellow") {
     // State b - LED B
-    digitalWrite(LED_B, HIGH);
-  } else if (currentState == "c") {
+    digitalWrite(LED_YELLOW, HIGH);
+  } else if (currentState == "red") {
     // State c - LED C
-    digitalWrite(LED_C, HIGH);
-  } else if (currentState == "halt") {
+    digitalWrite(LED_RED, HIGH);
+  } else if (currentState == "blue") {
     // Halt state - VALID LED
-    digitalWrite(LED_VALID, HIGH);
-  } else if (currentState == "reject") {
+    digitalWrite(LED_BLUE, HIGH);
+  } else if (currentState == "orange") {
     // Reject state - INVALID LED
-    digitalWrite(LED_INVALID, HIGH);
+    digitalWrite(LED_ORANGE, HIGH);
   }
 }
 
@@ -159,14 +159,14 @@ void loop() {
     // Check if rejected due to 'abc' detection
     if (tm.isRejected()) {
       // Update LEDs for reject state
-      updateLEDs("reject");
+      updateLEDs("orange");
       Serial.println("Machine halted - sequence rejected (abc found)");
 
       // Mark program as terminated to prevent further execution
       programTerminated = true;
     } else {
       // Update LEDs for halt state
-      updateLEDs("halt");
+      updateLEDs("blue");
       Serial.println("Machine halted - sequence accepted");
 
       // Mark program as terminated to prevent further execution

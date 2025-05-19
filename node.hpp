@@ -31,10 +31,10 @@ public:
   }
 
   // Adding range distance and reference node for transition
-  void addTransition(float minRange, float maxRange, Node* node) {
+  void addTransition(float range[2], Node* node) {
     if (transitionCount < MAX_TRANSITIONS) {
-      transitions[transitionCount].minRange = minRange;
-      transitions[transitionCount].maxRange = maxRange;
+      transitions[transitionCount].minRange = range[0];
+      transitions[transitionCount].maxRange = range[1];
       transitions[transitionCount].nextNode = node;
       transitions[transitionCount].isValid = true;
       transitionCount++;
