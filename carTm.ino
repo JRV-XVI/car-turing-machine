@@ -132,7 +132,7 @@ void moveCar(int seconds) {
   digitalWrite(IN_4, LOW);
 
   // Velocity
-  analogWrite(EN_A, 196);
+  analogWrite(EN_A, 200);
   analogWrite(EN_B, 193.3);
 
   // Start timer of movement
