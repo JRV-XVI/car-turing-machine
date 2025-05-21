@@ -23,12 +23,7 @@ public:
   bool isReject;  // Flag to indicate a reject state
 
   // Constructor
-  Node(bool isFinal, bool isReject = false) : transitionCount(0), isFinal(isFinal), isReject(isReject) {
-    // Initialize transitions
-    for (int i = 0; i < MAX_TRANSITIONS; i++) {
-      transitions[i].isValid = false;
-    }
-  }
+  Node(bool isFinal, bool isReject = false) : transitionCount(0), isFinal(isFinal), isReject(isReject) {}
 
   // Adding range distance and reference node for transition
   void addTransition(float range[2], Node* node) {
