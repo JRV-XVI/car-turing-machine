@@ -7,12 +7,12 @@
 class TM {
 private:
   // Declaring all nodes
-  Node *start;
-  Node *a;
+  Node *w;
+  Node *g;
+  Node *y;
+  Node *r;
   Node *b;
-  Node *c;
-  Node *halt;
-  Node *reject; // New reject state for "abc" detection
+  Node *o; // New reject state for "abc" detection
   Node *currentNode;
 
   // Output array
@@ -22,46 +22,52 @@ private:
 public:
   TM() {
     // Create nodes
-    start = new Node(false);
-    a = new Node(false);
-    b = new Node(false);
-    c = new Node(false);
-    halt = new Node(true, false);  // Final accepted state
-    reject = new Node(true, true); // Final rejected state
-    currentNode = start;
+    w = new Node(false);
+    g = new Node(false);
+    y = new Node(false);
+    r = new Node(false);
+    b = new Node(true, false); // Final accepted state
+    o = new Node(true, true);  // Final rejected state
+    currentNode = w;
     outputCount = 0;
 
+    // Transition range distance
+    float aTransition[2] = {0.0, 20.0};
+    float bTransition[2] = {20.0, 40.0};
+    float cTransition[2] = {40.0, 60.0};
+    float spaceTransition[2] = {60.0, 200.0};
+
     // Node start transition
-    start->addTransition(30.0, 100.0, a);
+    w->addTransition(spaceTransition, g);
 
     // Node a transitions
-    a->addTransition(0.0, 20.0, b);  // 'a' symbol
-    a->addTransition(20, 40.0, a); // 'b' symbol
-    a->addTransition(40.0, 60.0, a); // 'c' symbol
-    a->addTransition(60.0, 200.0, halt);
+    g->addTransition(aTransition, y);
+    g->addTransition(bTransition, g); 
+    g->addTransition(cTransition, g); 
+    g->addTransition(spaceTransition, b);
 
     // Node b transitions
-    b->addTransition(0.0, 20.0, b);
-    b->addTransition(20, 40.0, c); // 'b' symbol
-    b->addTransition(40.0, 60.0, a); // 'c' symbol
-    b->addTransition(60.0, 200.0, halt);
+    y->addTransition(aTransition, y);
+    y->addTransition(bTransition, r); 
+    y->addTransition(cTransition, g); 
+    y->addTransition(spaceTransition, b);
 
     // Node c transitions
-    c->addTransition(0.0, 20.0, b);  // 'a' symbol
-    c->addTransition(20, 40.0, a); // 'b' symbol
-    c->addTransition(40.0, 60.0, c); // 'c' symbol
-    c->addTransition(60.0, 200.0, halt);
+    r->addTransition(aTransition, y); 
+    r->addTransition(bTransition, r); 
+    r->addTransition(cTransition, o); 
+    r->addTransition(spaceTransition, b);
   }
 
   // Returns the current node as a character
   char getCurrentNodeChar() {
-    if (currentNode == a)
-      return 'a';
-    else if (currentNode == b)
-      return 'b';
-    else if (currentNode == c)
-      return 'c';
-    else if (currentNode == halt || currentNode == reject)
+    if (currentNode == g)
+      return 'g';
+    else if (currentNode == y)
+      return 'y';
+    else if (currentNode == r)
+      return 'r';
+    else if (currentNode == b || currentNode == o)
       return '_';
     else
       return '?';
@@ -69,18 +75,18 @@ public:
 
   // Returns the current state as a string
   String getCurrentState() {
-    if (currentNode == start)
-      return "start";
-    else if (currentNode == a)
-      return "a";
+    if (currentNode == w)
+      return "white";
+    else if (currentNode == g)
+      return "green";
+    else if (currentNode == y)
+      return "yellow";
+    else if (currentNode == r)
+      return "red";
     else if (currentNode == b)
-      return "b";
-    else if (currentNode == c)
-      return "c";
-    else if (currentNode == halt)
-      return "halt";
-    else if (currentNode == reject)
-      return "reject";
+      return "blue";
+    else if (currentNode == o)
+      return "orange";
     else
       return "unknown";
   }
@@ -88,30 +94,11 @@ public:
   bool analyze(float distance) {
     Node *nextNode = currentNode->getNextNode(distance);
     if (nextNode != nullptr) {
-      // Store current node before transition
-      Node *prevNode = currentNode;
-
-      // Make the transition
       currentNode = nextNode;
       char currentSymbol = getCurrentNodeChar();
 
       if (outputCount < MAX_OUTPUT_SIZE) {
         output[outputCount++] = currentSymbol;
-      }
-
-      // Only reject if:
-      // 1. We were in state C
-      // 2. We're still in state C (self-loop)
-      // 3. The output contains "abc"
-      if (prevNode == c && currentNode == c) {
-        // Check for "abc" pattern in the entire output
-        for (int i = 0; i < outputCount - 2; i++) {
-          if (output[i] == 'a' && output[i + 1] == 'b' &&
-              output[i + 2] == 'c') {
-            currentNode = reject;
-            break;
-          }
-        }
       }
 
       return true;
