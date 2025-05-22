@@ -54,7 +54,7 @@ public:
 
     // Node c transitions
     r->addTransition(aTransition, y); 
-    r->addTransition(bTransition, r); 
+    r->addTransition(bTransition, g); 
     r->addTransition(cTransition, o); 
     r->addTransition(spaceTransition, b);
   }
