@@ -103,7 +103,7 @@ void updateLEDs(String currentState) {
   digitalWrite(LED_WHITE, LOW);
 
   // Turn on appropriate LED based on state
-  if (currentState == "start") {
+  if (currentState == "white") {
     // Start state - empty LED
     digitalWrite(LED_WHITE, HIGH);
   } else if (currentState == "green") {
